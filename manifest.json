@@ -1,20 +1,3 @@
-{
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "standalone",
-  "name": "zylos examsoftware",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "zylos",
-  "start_url": "/",
-  "theme_color": "#ffffff",
-  "description": "Zylos Exam Software helps schools, teachers, and students conduct exams digitally.",
-  "categories": [
-    "education",
-    "productivity"
-  ]
-  "src":"/images/icon512.png",
-}
 
 
 
