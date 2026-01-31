@@ -8,11 +8,12 @@
   "short_name": "zylos",
   "start_url": "/",
   "theme_color": "#ffffff",
-  "id": "zylos",
-  "description": "Zylos Exam Software helps schools, teachers, and students conduct exams digitally.\nIt offers smooth test-taking, real-time evaluation, and a distraction-free exam environment.\nMore technical\n\nMore student-focused\n\nMore teacher-focused",
- "src":"/images/icon512.png",
-  "name":"zylos examsoftware",
-  "short-name": "Zylos",
+  "description": "Zylos Exam Software helps schools, teachers, and students conduct exams digitally.",
+  "categories": [
+    "education",
+    "productivity"
+  ]
+  "src":"/images/icon512.png",
 }
 
 
