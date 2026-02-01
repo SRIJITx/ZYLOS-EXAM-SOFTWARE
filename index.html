@@ -4,8 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zylos - Exam Software</title>
+    
+    <!-- ========== PWA METADATA ========== -->
+    <!-- Required for PWA Installation -->
+    <meta name="theme-color" content="#1a2a6c">
+    <meta name="description" content="Zylos - Secure online examination platform">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zylos Exam">
+    
+    <!-- Favicon and PWA Icons -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/96/000000/exam.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/180/000000/exam.png">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" id="app-manifest">
+    
+    <!-- ========== EXTERNAL STYLES ========== -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* Your existing CSS remains the same */
         * {
             margin: 0;
             padding: 0;
@@ -195,9 +215,9 @@
         }
 
         .exam-type.selected {
-            border-color: #2a3a8c;
-            background-color: rgba(42, 58, 140, 0.05);
-            box-shadow: 0 5px 15px rgba(42, 58, 140, 0.1);
+            border-color: #2a3a6c;
+            background-color: rgba(26, 42, 108, 0.05);
+            box-shadow: 0 5px 15px rgba(26, 42, 108, 0.1);
         }
 
         .exam-type i {
@@ -486,10 +506,115 @@
             margin-bottom: 30px;
             color: #dc3545;
         }
+
+        /* ========== PWA INSTALL BUTTON STYLES ========== */
+        .pwa-install-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .pwa-install-btn {
+            background: linear-gradient(135deg, #1a2a6c, #2a3a8c);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .pwa-install-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(26, 42, 108, 0.4);
+        }
+
+        .pwa-install-btn.hidden {
+            display: none;
+        }
+
+        .install-icon {
+            font-size: 1.2rem;
+        }
+
+        /* PWA Install Prompt Styles */
+        .install-prompt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            padding: 20px;
+        }
+
+        .install-prompt-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .install-prompt-icon {
+            font-size: 4rem;
+            color: #1a2a6c;
+            margin-bottom: 20px;
+        }
+
+        .install-prompt-title {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .install-prompt-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .install-prompt-buttons button {
+            flex: 1;
+        }
     </style>
-     <link rel="manifest" href="manifest.json">
+   
 </head>
 <body>
+    <!-- PWA Install Button -->
+    <div class="pwa-install-container">
+        <button id="pwaInstallBtn" class="pwa-install-btn hidden">
+            <i class="fas fa-download install-icon"></i>
+            Install App
+        </button>
+    </div>
+
+    <!-- PWA Install Prompt -->
+    <div id="installPrompt" class="install-prompt-overlay" style="display: none;">
+        <div class="install-prompt-card">
+            <i class="fas fa-mobile-alt install-prompt-icon"></i>
+            <h2 class="install-prompt-title">Install Zylos Exam</h2>
+            <p>Install this app on your home screen for quick and easy access when you're offline.</p>
+            <p>It works just like a native app!</p>
+            <div class="install-prompt-buttons">
+                <button id="cancelInstall" class="btn btn-secondary">Not Now</button>
+                <button id="confirmInstall" class="btn">Install Now</button>
+            </div>
+        </div>
+    </div>
+
     <header>
         <div class="container">
             <div class="logo">
@@ -497,6 +622,9 @@
                 <h1>Zylos Exam</h1>
             </div>
             <p class="tagline">Secure online examination platform</p>
+            <p style="font-size: 0.9rem; margin-top: 5px; opacity: 0.8;">
+                <i class="fas fa-mobile-alt"></i> Installable App
+            </p>
         </div>
     </header>
 
@@ -658,6 +786,7 @@
     <footer>
         <div class="container">
             <p>Zylos Exam Software - Secure Online Examination Platform</p>
+            <p>Now available as an installable PWA app!</p>
             <p>Developed by <span class="developer">Srijit Mukherjee</span></p>
         </div>
     </footer>
@@ -672,6 +801,217 @@
     </div>
 
     <script>
+        // ========== PWA CONFIGURATION ==========
+        // Generate Web App Manifest dynamically
+        const manifest = {
+            "name": "Zylos Exam",
+            "short_name": "Zylos",
+            "description": "Secure online examination platform",
+            "start_url": window.location.href,
+            "display": "standalone",
+            "background_color": "#f5f7fa",
+            "theme_color": "#1a2a6c",
+            "orientation": "portrait-primary",
+            "icons": [
+                {
+                    "src": "/icon72.png",
+                    "sizes": "72x72",
+                    "type": "image/png",
+                    "purpose": "any"
+                },
+                {
+                    "src": "/icon96.png",
+                    "sizes": "96x96",
+                    "type": "image/png",
+                    "purpose": "any"
+                },
+                {
+                    "src": "/icon144.png",
+                    "sizes": "144x144",
+                    "type": "image/png",
+                    "purpose": "any"
+                },
+                {
+                    "src": "/icon192.png",
+                    "sizes": "192x192",
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                },
+                {
+                    "src": "/icon512.png",
+                    "sizes": "512x512",
+                    "type": "image/png",
+                    "purpose": "any maskable"
+                }
+            ],
+            "categories": ["education", "productivity", "utilities"],
+            "scope": "/",
+            "lang": "en"
+        };
+
+        // Create and inject manifest
+        const manifestString = JSON.stringify(manifest);
+        const manifestBlob = new Blob([manifestString], { type: 'application/json' });
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.getElementById('app-manifest').href = manifestURL;
+
+        // PWA Variables
+        let deferredPrompt;
+        const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+        const installPrompt = document.getElementById('installPrompt');
+        const cancelInstallBtn = document.getElementById('cancelInstall');
+        const confirmInstallBtn = document.getElementById('confirmInstall');
+
+        // ========== PWA INSTALLATION HANDLING ==========
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 76+ from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            
+            // Show install button
+            pwaInstallBtn.classList.remove('hidden');
+            
+            // Show install prompt automatically after 5 seconds
+            setTimeout(() => {
+                if (!isAppInstalled()) {
+                    installPrompt.style.display = 'flex';
+                }
+            }, 5000);
+        });
+
+        // Install button click handler
+        pwaInstallBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                // Show the install prompt
+                deferredPrompt.prompt();
+                
+                // Wait for the user to respond to the prompt
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                        pwaInstallBtn.classList.add('hidden');
+                        showInstallSuccessMessage();
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        // Install prompt buttons
+        confirmInstallBtn.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showInstallSuccessMessage();
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        cancelInstallBtn.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+        });
+
+        // Check if app is already installed
+        function isAppInstalled() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true ||
+                   document.referrer.includes('android-app://');
+        }
+
+        // Show install success message
+        function showInstallSuccessMessage() {
+            const successMsg = document.createElement('div');
+            successMsg.innerHTML = `
+                <div style="position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 15px; border-radius: 8px; z-index: 10002; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <i class="fas fa-check-circle"></i> App installed successfully!
+                </div>
+            `;
+            document.body.appendChild(successMsg);
+            setTimeout(() => successMsg.remove(), 3000);
+        }
+
+        // ========== SERVICE WORKER REGISTRATION ==========
+        // Inline Service Worker Code
+        const serviceWorkerCode = `
+            self.addEventListener('install', event => {
+                console.log('Zylos Exam PWA: Service Worker installing.');
+                // Cache important resources
+                event.waitUntil(
+                    caches.open('zylos-v1').then(cache => {
+                        return cache.addAll([
+                            '/',
+                            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+                            'https://img.icons8.com/color/96/000000/exam.png'
+                        ]);
+                    })
+                );
+            });
+
+            self.addEventListener('fetch', event => {
+                event.respondWith(
+                    caches.match(event.request).then(response => {
+                        return response || fetch(event.request);
+                    })
+                );
+            });
+
+            self.addEventListener('activate', event => {
+                console.log('Zylos Exam PWA: Service Worker activated.');
+            });
+        `;
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Create a Blob with the service worker code
+                const serviceWorkerBlob = new Blob([serviceWorkerCode], { type: 'application/javascript' });
+                const serviceWorkerURL = URL.createObjectURL(serviceWorkerBlob);
+                
+                navigator.serviceWorker.register(serviceWorkerURL)
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // ========== OFFLINE DETECTION ==========
+        window.addEventListener('online', () => {
+            showStatusMessage('You are back online!', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            showStatusMessage('You are offline. Some features may not work.', 'warning');
+        });
+
+        function showStatusMessage(message, type) {
+            const statusDiv = document.createElement('div');
+            const bgColor = type === 'success' ? '#28a745' : '#ffc107';
+            statusDiv.innerHTML = \`
+                <div style="position: fixed; top: 0; left: 0; width: 100%; background: \${bgColor}; color: white; text-align: center; padding: 10px; z-index: 10003;">
+                    <i class="fas fa-\${type === 'success' ? 'wifi' : 'exclamation-triangle'}"></i> \${message}
+                </div>
+            \`;
+            document.body.appendChild(statusDiv);
+            setTimeout(() => statusDiv.remove(), 3000);
+        }
+
+        // Check initial online status
+        if (!navigator.onLine) {
+            showStatusMessage('You are offline. App is running in limited mode.', 'warning');
+        }
+
+        // ========== YOUR EXISTING JAVASCRIPT CODE ==========
         // Global variables
         let currentExam = null;
         let currentExamData = null;
@@ -762,46 +1102,46 @@
             questionDiv.className = 'question-container';
             questionDiv.setAttribute('data-id', questionCount);
             
-            let questionHTML = `
-                <h3>Question ${questionCount}</h3>
+            let questionHTML = \`
+                <h3>Question \${questionCount}</h3>
                 <div class="form-group">
-                    <label for="question-text-${questionCount}">Question Text</label>
-                    <textarea id="question-text-${questionCount}" rows="3" placeholder="Enter your question here" required></textarea>
+                    <label for="question-text-\${questionCount}">Question Text</label>
+                    <textarea id="question-text-\${questionCount}" rows="3" placeholder="Enter your question here" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="question-marks-${questionCount}">Marks</label>
-                    <input type="number" id="question-marks-${questionCount}" placeholder="e.g., 10" min="1" required>
+                    <label for="question-marks-\${questionCount}">Marks</label>
+                    <input type="number" id="question-marks-\${questionCount}" placeholder="e.g., 10" min="1" required>
                 </div>
-            `;
+            \`;
             
             // Add options for MCQ and Mixed types
             if (examType === 'mcq' || examType === 'mixed') {
-                questionHTML += `
+                questionHTML += \`
                     <div class="form-group">
                         <label>Options (Select correct option)</label>
-                        <div class="option-container" id="options-container-${questionCount}">
+                        <div class="option-container" id="options-container-\${questionCount}">
                             <div class="option-label">
-                                <input type="radio" name="correct-option-${questionCount}" value="0" required>
+                                <input type="radio" name="correct-option-\${questionCount}" value="0" required>
                                 <input type="text" class="option-text" placeholder="Option A" required>
                             </div>
                             <div class="option-label">
-                                <input type="radio" name="correct-option-${questionCount}" value="1" required>
+                                <input type="radio" name="correct-option-\${questionCount}" value="1" required>
                                 <input type="text" class="option-text" placeholder="Option B" required>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-secondary add-option-btn" data-question="${questionCount}" style="margin-top: 10px;">
+                        <button type="button" class="btn btn-secondary add-option-btn" data-question="\${questionCount}" style="margin-top: 10px;">
                             <i class="fas fa-plus"></i> Add Option
                         </button>
                     </div>
-                `;
+                \`;
             }
             
             // Add remove question button
-            questionHTML += `
-                <button type="button" class="btn btn-danger remove-question-btn" data-id="${questionCount}" style="margin-top: 15px;">
+            questionHTML += \`
+                <button type="button" class="btn btn-danger remove-question-btn" data-id="\${questionCount}" style="margin-top: 15px;">
                     <i class="fas fa-trash"></i> Remove Question
                 </button>
-            `;
+            \`;
             
             questionDiv.innerHTML = questionHTML;
             questionsContainer.appendChild(questionDiv);
@@ -829,18 +1169,18 @@
 
         // Function to add an option to MCQ question
         function addOption(questionId) {
-            const optionsContainer = document.getElementById(`options-container-${questionId}`);
+            const optionsContainer = document.getElementById(\`options-container-\${questionId}\`);
             const optionCount = optionsContainer.querySelectorAll('.option-label').length;
             const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
             
             if (optionCount < 6) {
                 const optionLabel = document.createElement('div');
                 optionLabel.className = 'option-label';
-                optionLabel.innerHTML = `
-                    <input type="radio" name="correct-option-${questionId}" value="${optionCount}" required>
-                    <input type="text" class="option-text" placeholder="Option ${optionLetters[optionCount]}" required>
+                optionLabel.innerHTML = \`
+                    <input type="radio" name="correct-option-\${questionId}" value="\${optionCount}" required>
+                    <input type="text" class="option-text" placeholder="Option \${optionLetters[optionCount]}" required>
                     <button type="button" class="remove-option-btn" style="margin-left: auto; background: #dc3545; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer;">×</button>
-                `;
+                \`;
                 
                 optionsContainer.appendChild(optionLabel);
                 
@@ -864,7 +1204,7 @@
             questionContainers.forEach((container, index) => {
                 const newId = index + 1;
                 container.setAttribute('data-id', newId);
-                container.querySelector('h3').textContent = `Question ${newId}`;
+                container.querySelector('h3').textContent = \`Question \${newId}\`;
                 
                 // Update IDs and names of inputs
                 const textarea = container.querySelector('textarea');
@@ -873,11 +1213,11 @@
                 const removeBtn = container.querySelector('.remove-question-btn');
                 
                 if (textarea) {
-                    textarea.id = `question-text-${newId}`;
+                    textarea.id = \`question-text-\${newId}\`;
                 }
                 
                 if (marksInput) {
-                    marksInput.id = `question-marks-${newId}`;
+                    marksInput.id = \`question-marks-\${newId}\`;
                 }
                 
                 if (addOptionBtn) {
@@ -886,13 +1226,13 @@
                     // Update radio button names
                     const radioButtons = container.querySelectorAll('input[type="radio"]');
                     radioButtons.forEach(radio => {
-                        radio.name = `correct-option-${newId}`;
+                        radio.name = \`correct-option-\${newId}\`;
                     });
                     
                     // Update options container ID
                     const optionsContainer = container.querySelector('.option-container');
                     if (optionsContainer) {
-                        optionsContainer.id = `options-container-${newId}`;
+                        optionsContainer.id = \`options-container-\${newId}\`;
                     }
                 }
                 
@@ -922,8 +1262,8 @@
             
             questionContainers.forEach((container, index) => {
                 const questionId = index + 1;
-                const questionText = document.getElementById(`question-text-${questionId}`).value;
-                const questionMarks = document.getElementById(`question-marks-${questionId}`).value;
+                const questionText = document.getElementById(\`question-text-\${questionId}\`).value;
+                const questionMarks = document.getElementById(\`question-marks-\${questionId}\`).value;
                 
                 const question = {
                     id: questionId,
@@ -953,7 +1293,7 @@
                     );
                     
                     if (!hasCorrectOption) {
-                        alert(`Please mark the correct option for Question ${questionId}`);
+                        alert(\`Please mark the correct option for Question \${questionId}\`);
                         throw new Error('No correct option selected');
                     }
                 }
@@ -982,8 +1322,8 @@
             
             // Generate links
             const baseUrl = window.location.origin + window.location.pathname;
-            const examLink = `${baseUrl}?exam=${examId}`;
-            const dashboardLink = `${baseUrl}?dashboard=${examId}`;
+            const examLink = \`\${baseUrl}?exam=\${examId}\`;
+            const dashboardLink = \`\${baseUrl}?dashboard=\${examId}\`;
             
             // Display links
             alert('Exam created successfully! Switch to the "Results Dashboard" tab to access your exam and dashboard links.');
@@ -1092,60 +1432,60 @@
                 questionDiv.className = 'question-container';
                 questionDiv.setAttribute('data-question-id', question.id);
                 
-                let questionHTML = `
-                    <h3>Question ${index + 1} (${question.marks} marks)</h3>
-                    <p>${question.text}</p>
-                `;
+                let questionHTML = \`
+                    <h3>Question \${index + 1} (\${question.marks} marks)</h3>
+                    <p>\${question.text}</p>
+                \`;
                 
                 // Add input based on exam type
                 if (exam.type === 'broad') {
-                    questionHTML += `
+                    questionHTML += \`
                         <div class="form-group">
-                            <label for="answer-${question.id}">Your Answer:</label>
-                            <textarea id="answer-${question.id}" rows="5" placeholder="Type your answer here"></textarea>
+                            <label for="answer-\${question.id}">Your Answer:</label>
+                            <textarea id="answer-\${question.id}" rows="5" placeholder="Type your answer here"></textarea>
                         </div>
                         <div class="warning">
                             <i class="fab fa-whatsapp"></i>
                             <div>For broad questions, you must also send your answer to the teacher's WhatsApp number after submitting.</div>
                         </div>
-                    `;
+                    \`;
                 } else if (exam.type === 'mcq') {
-                    questionHTML += `<div class="form-group">`;
+                    questionHTML += \`<div class="form-group">\`;
                     question.options.forEach((option, optIndex) => {
-                        const optionId = `question-${question.id}-option-${optIndex}`;
-                        questionHTML += `
+                        const optionId = \`question-\${question.id}-option-\${optIndex}\`;
+                        questionHTML += \`
                             <div class="option-label">
-                                <input type="radio" id="${optionId}" name="question-${question.id}" value="${optIndex}">
-                                <label for="${optionId}" style="margin-bottom: 0; cursor: pointer; flex: 1;">${option.text}</label>
+                                <input type="radio" id="\${optionId}" name="question-\${question.id}" value="\${optIndex}">
+                                <label for="\${optionId}" style="margin-bottom: 0; cursor: pointer; flex: 1;">\${option.text}</label>
                             </div>
-                        `;
+                        \`;
                     });
-                    questionHTML += `</div>`;
+                    questionHTML += \`</div>\`;
                 } else if (exam.type === 'mixed') {
                     // For mixed exams, check if question has options (MCQ) or not (broad)
                     if (question.options && question.options.length > 0) {
-                        questionHTML += `<div class="form-group">`;
+                        questionHTML += \`<div class="form-group">\`;
                         question.options.forEach((option, optIndex) => {
-                            const optionId = `question-${question.id}-option-${optIndex}`;
-                            questionHTML += `
+                            const optionId = \`question-\${question.id}-option-\${optIndex}\`;
+                            questionHTML += \`
                                 <div class="option-label">
-                                    <input type="radio" id="${optionId}" name="question-${question.id}" value="${optIndex}">
-                                    <label for="${optionId}" style="margin-bottom: 0; cursor: pointer; flex: 1;">${option.text}</label>
+                                    <input type="radio" id="\${optionId}" name="question-\${question.id}" value="\${optIndex}">
+                                    <label for="\${optionId}" style="margin-bottom: 0; cursor: pointer; flex: 1;">\${option.text}</label>
                                 </div>
-                            `;
+                            \`;
                         });
-                        questionHTML += `</div>`;
+                        questionHTML += \`</div>\`;
                     } else {
-                        questionHTML += `
+                        questionHTML += \`
                             <div class="form-group">
-                                <label for="answer-${question.id}">Your Answer:</label>
-                                <textarea id="answer-${question.id}" rows="5" placeholder="Type your answer here"></textarea>
+                                <label for="answer-\${question.id}">Your Answer:</label>
+                                <textarea id="answer-\${question.id}" rows="5" placeholder="Type your answer here"></textarea>
                             </div>
                             <div class="warning">
                                 <i class="fab fa-whatsapp"></i>
                                 <div>For broad questions, you must also send your answer to the teacher's WhatsApp number after submitting.</div>
                             </div>
-                        `;
+                        \`;
                     }
                 }
                 
@@ -1167,7 +1507,7 @@
             const seconds = timeLeft % 60;
             const timerDisplay = document.getElementById('exam-timer');
             
-            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timerDisplay.textContent = \`\${minutes.toString().padStart(2, '0')}:\${seconds.toString().padStart(2, '0')}\`;
             
             // Change color when less than 10 minutes left
             if (timeLeft < 600) {
@@ -1194,7 +1534,7 @@
                 let studentAnswer;
                 
                 if (currentExam.type === 'broad') {
-                    const answerTextarea = document.getElementById(`answer-${question.id}`);
+                    const answerTextarea = document.getElementById(\`answer-\${question.id}\`);
                     studentAnswer = answerTextarea ? answerTextarea.value : '';
                     
                     // For broad questions, we can't auto-grade, so no score added
@@ -1205,7 +1545,7 @@
                     });
                 } else if (currentExam.type === 'mcq' || 
                           (currentExam.type === 'mixed' && question.options && question.options.length > 0)) {
-                    const selectedOption = document.querySelector(`input[name="question-${question.id}"]:checked`);
+                    const selectedOption = document.querySelector(\`input[name="question-\${question.id}"]:checked\`);
                     
                     if (selectedOption) {
                         const selectedOptionIndex = parseInt(selectedOption.value);
@@ -1233,7 +1573,7 @@
                     }
                 } else if (currentExam.type === 'mixed') {
                     // Mixed exam broad question
-                    const answerTextarea = document.getElementById(`answer-${question.id}`);
+                    const answerTextarea = document.getElementById(\`answer-\${question.id}\`);
                     studentAnswer = answerTextarea ? answerTextarea.value : '';
                     
                     answers.push({
@@ -1264,7 +1604,7 @@
             clearInterval(examTimerInterval);
             
             // Show success message
-            alert(`Exam submitted successfully! Your score: ${score}/${currentExam.totalMarks}`);
+            alert(\`Exam submitted successfully! Your score: \${score}/\${currentExam.totalMarks}\`);
             
             // Reset UI
             examEntry.style.display = 'block';
@@ -1309,12 +1649,12 @@
             dashboardContent.style.display = 'block';
             
             // Set exam title
-            document.getElementById('dashboard-exam-title').textContent = `${exam.examTitle} - Created by ${exam.teacherName}`;
+            document.getElementById('dashboard-exam-title').textContent = \`\${exam.examTitle} - Created by \${exam.teacherName}\`;
             
             // Generate and display links
             const baseUrl = window.location.origin + window.location.pathname;
-            const examLink = `${baseUrl}?exam=${examId}`;
-            const dashboardLinkFull = `${baseUrl}?dashboard=${examId}`;
+            const examLink = \`\${baseUrl}?exam=\${examId}\`;
+            const dashboardLinkFull = \`\${baseUrl}?dashboard=\${examId}\`;
             
             document.getElementById('dashboard-exam-link').textContent = examLink;
             document.getElementById('dashboard-dashboard-link').textContent = dashboardLinkFull;
@@ -1341,13 +1681,13 @@
             resultsTableBody.innerHTML = '';
             
             if (exam.students.length === 0) {
-                resultsTableBody.innerHTML = `
+                resultsTableBody.innerHTML = \`
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 30px;">
                             No students have taken the exam yet.
                         </td>
                     </tr>
-                `;
+                \`;
             } else {
                 exam.students.forEach(student => {
                     const row = document.createElement('tr');
@@ -1364,12 +1704,12 @@
                         status = 'Incomplete';
                     }
                     
-                    row.innerHTML = `
-                        <td>${student.name}</td>
-                        <td><strong>${student.score}/${exam.totalMarks}</strong></td>
-                        <td>${status}</td>
-                        <td>${formattedDate}</td>
-                    `;
+                    row.innerHTML = \`
+                        <td>\${student.name}</td>
+                        <td><strong>\${student.score}/\${exam.totalMarks}</strong></td>
+                        <td>\${status}</td>
+                        <td>\${formattedDate}</td>
+                    \`;
                     
                     resultsTableBody.appendChild(row);
                 });
@@ -1536,8 +1876,12 @@
                 document.getElementById('dashboard-link').value = window.location.href;
                 loadDashboard();
             }
+            
+            // Check if app is already installed
+            if (isAppInstalled()) {
+                pwaInstallBtn.classList.add('hidden');
+            }
         });
     </script>
 </body>
-
 </html>
